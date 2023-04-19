@@ -1,75 +1,121 @@
 import random
+
+
 class Time:
-    """A class that represents time in the format HH:MM"""
+    """Class that represents the time of a reservation"""
+
     def __init__(self, hour, minute):
         self.hour = int(hour)
         self.minute = int(minute)
 
     def __lt__(self, other):
-        """Compare two times based on their hour and minute"""
-        """ return True if self < other, and False otherwise"""
+        """return True if self < other, and False otherwise"""
         if self.hour < other.hour:
             return True
         elif self.hour == other.hour and self.minute < other.minute:
             return True
         else:
             return False
-    
+
     def __eq__(self, other):
         """Compare two times based on their hour and minute"""
-        """ return True if self == other, and False otherwise"""
-        if self.hour ==  other.hour and self.minute == other.minute:
+        """return True if self == other, and False otherwise"""
+        if self.hour == other.hour and self.minute == other.minute:
             return True
         else:
             return False
 
     def __repr__(self):
-        """Return the string representation of the time"""
+        """The string representation of the time"""
         return f"{self.hour:02d}:{self.minute:02d}"
 
+
 class Entry:
-    """A class that represents a customer in the waitlist"""
+    """A class that represents a customer and their reservation time"""
+
     def __init__(self, name, time):
         self.name = name
         self.time = time
 
     def __lt__(self, other):
-        """Compare two customers based on their time, if equal then compare based on the customer name"""
+        """Less than operator"""
         if self.time == other.time:
             return self.name < other.name
         return self.time < other.time
-    
+
+    def __repr__(self):
+        """The string representation of the custome and their reservation time"""
+        return f"{self.name}: {self.time}"
+
 
 class Waitlist:
     def __init__(self):
         self._entries = []
 
+    def __len__(self):
+        return len(self._entries)
+
     def add_customer(self, item, priority):
-        #TODO add customers to the waiting list.
-        pass
+        # TODO add customers to the waiting list.
+        customer = Entry(item, priority)
+        if len(self._entries) == 0 or self._entries[-1] > customer:
+            self._entries.append(customer)
+
+        else:
+            for i in range(len(self._entries)):
+                if self._entries[i] > customer:
+                    continue
+                self._rearrange(customer, i)
+                break
+
+    def _rearrange(self, customer, index):
+        """Rearranges the priority queue so that the customer with the highest priority is at the front of"""
+        new_entries = self._entries[:index]
+        new_entries.append(customer)
+        new_entries += self._entries[index:]
+        self._entries = new_entries
 
     def peek(self):
-        #TODO peek and see the first customer in the waitlist (i.e., the customer with the highest priority).
-        # Return a tuple of the extracted item (customer, time). Return None if the heap is empty
-        pass
+        """returns tuple of customer and time"""
+        # TODO peek and see the first customer in the waitlist (i.e., the customer with the highest priority).
+        if len(self._entries) == 0:
+            return None
+        else:
+            return (self._entries[-1].name, self._entries[-1].time)
 
     def seat_customer(self):
-        #TODO The program should extract the customer with the highest priority 
-        # (i.e., the earliest reservation time) from the priority queue.
-        # Return a tuple of the extracted item (customer, time)
-        pass
-
+        """Returns a tuple of customer and time of the customer"""
+        # TODO The program should extract the customer with the highest priority
+        if len(self._entries) == 0:
+            return None
+        else:
+            last_seated_customer = (self._entries[-1].name, self._entries[-1].time)
+            self._entries.pop()
+            return last_seated_customer
 
     def print_reservation_list(self):
-        #TODO Prints all customers in order of their priority (reservation time).
-        #Maintain the heap property
-        pass
-    
+        """prints the reservation list"""
+        # TODO Prints all customers in order of their priority (reservation time).
+        print("__________________________________________________")
+        for i in range(len(self._entries)):
+            index = len(self._entries) - i - 1
+            entry = self._entries[index]
+            print(
+                "The next customer on the waitlist is: "
+                + entry.name
+                + ", time: "
+                + entry.time
+            )
+        print("__________________________________________________")
+
     def change_reservation(self, name, new_priority):
-        #TODO Change the reservation time (priority) for the customer with the given name
-        pass
+        """changes the reservatioon time (priority) for the customer with the given name"""
+        # TODO Change the reservation time (priority) for the customer with the given name
+        for i in range(len(self._entries)):
+            if self._entries[i].name == name:
+                self._entries.remove(self._entries[i])
+                self.add_customer(name, new_priority)
+                return True
+        return False
 
-    #Add other methods you may need
-
-
-
+    # Add other methods you may need
